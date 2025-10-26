@@ -44,48 +44,76 @@ class BookCardList extends StatelessWidget {
         switch (book.status) {
           case BookStatus.read:
             return BlocBuilder<SortFinishedBooksBloc, SortState>(
-              builder: (_, state) => _buildSortAttributeContent(state.sortType),
+              builder: (_, state) =>
+                  _buildSortAttributeContent(state.sortType, state.isAsc),
             );
           case BookStatus.inProgress:
             return BlocBuilder<SortInProgressBooksBloc, SortState>(
-              builder: (_, state) => _buildSortAttributeContent(state.sortType),
+              builder: (_, state) =>
+                  _buildSortAttributeContent(state.sortType, state.isAsc),
             );
           case BookStatus.forLater:
             return BlocBuilder<SortForLaterBooksBloc, SortState>(
-              builder: (_, state) => _buildSortAttributeContent(state.sortType),
+              builder: (_, state) =>
+                  _buildSortAttributeContent(state.sortType, state.isAsc),
             );
           case BookStatus.unfinished:
             return BlocBuilder<SortUnfinishedBooksBloc, SortState>(
-              builder: (_, state) => _buildSortAttributeContent(state.sortType),
+              builder: (_, state) =>
+                  _buildSortAttributeContent(state.sortType, state.isAsc),
             );
         }
       },
     );
   }
 
-  Widget _buildSortAttributeContent(SortType sortType) {
+  Widget _buildSortAttributeContent(SortType sortType, bool isAsc) {
     if (sortType == SortType.byPages) {
       return (book.pages != null) ? _buildPagesAttribute() : const SizedBox();
-    } else if (sortType == SortType.byStartDate) {
+    } else if (sortType == SortType.byStartDate ||
+        sortType == SortType.byFinishDate) {
+      // For start/finish sorts: display both when available.
+      // Order depends on sort order: if ascending -> start then finish; if descending -> finish then start.
+      final latestFinishDate = getLatestFinishDate(book);
       final latestStartDate = getLatestStartDate(book);
 
-      return (latestStartDate != null)
-          ? _buildDateAttribute(
-              latestStartDate,
-              LocaleKeys.started_on_date.tr(),
-              false,
-            )
-          : const SizedBox();
-    } else if (sortType == SortType.byFinishDate) {
-      final latestFinishDate = getLatestFinishDate(book);
+      if (latestFinishDate == null && latestStartDate == null) {
+        return const SizedBox();
+      }
 
-      return (latestFinishDate != null)
-          ? _buildDateAttribute(
-              latestFinishDate,
-              LocaleKeys.finished_on_date.tr(),
-              false,
-            )
-          : const SizedBox();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (isAsc) ...[
+            if (latestStartDate != null)
+              _buildDateAttribute(
+                latestStartDate,
+                LocaleKeys.started_on_date.tr(),
+                false,
+              ),
+            if (latestFinishDate != null)
+              _buildDateAttribute(
+                latestFinishDate,
+                LocaleKeys.finished_on_date.tr(),
+                false,
+              ),
+          ] else ...[
+            if (latestFinishDate != null)
+              _buildDateAttribute(
+                latestFinishDate,
+                LocaleKeys.finished_on_date.tr(),
+                false,
+              ),
+            if (latestStartDate != null)
+              _buildDateAttribute(
+                latestStartDate,
+                LocaleKeys.started_on_date.tr(),
+                false,
+              ),
+          ]
+        ],
+      );
+    } else if (sortType == SortType.byFinishDate) {
     } else if (sortType == SortType.byDateAdded) {
       return _buildDateAttribute(
         book.dateAdded,
@@ -265,9 +293,10 @@ class BookCardList extends StatelessWidget {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Title row with favourite and format icon
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
@@ -295,6 +324,8 @@ class BookCardList extends StatelessWidget {
               _buildBookFormatIcon(context),
             ],
           ),
+
+          // Author
           Text(
             book.author,
             softWrap: true,
@@ -304,30 +335,76 @@ class BookCardList extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
             ),
           ),
-          book.publicationYear != null
-              ? Text(
-                  book.publicationYear.toString(),
-                  softWrap: true,
-                  overflow: TextOverflow.clip,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.6),
-                    letterSpacing: 0.05,
-                  ),
-                )
-              : const SizedBox(),
-          const SizedBox(height: 5),
+
+          const SizedBox(height: 6),
+
+          // Two-column row: left = pages/date/rating/tags, right = sort attributes
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              book.status == BookStatus.read
-                  ? _buildRating(context)
-                  : const SizedBox(),
-              _buildSortAttribute(),
+              // Left column: pages, publication year/date, rating, tags
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        if (book.pages != null)
+                          Text(
+                            '${book.pages} ${LocaleKeys.pages_lowercase.tr()}',
+                            softWrap: true,
+                            overflow: TextOverflow.clip,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.6),
+                              letterSpacing: 0.05,
+                            ),
+                          ),
+                        if (book.pages != null && book.publicationYear != null)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 4.0),
+                            child: Text(
+                              '·',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        if (book.publicationYear != null)
+                          Text(
+                            book.publicationYear.toString(),
+                            softWrap: true,
+                            overflow: TextOverflow.clip,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.6),
+                              letterSpacing: 0.05,
+                            ),
+                          ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 5),
+
+                    // Rating placed in the left column (independent from sort attribute)
+                    book.status == BookStatus.read
+                        ? _buildRating(context)
+                        : const SizedBox(),
+                  ],
+                ),
+              ),
+
+              // Right column: sort attribute, aligned to top-right
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _buildSortAttribute(),
+                ],
+              ),
             ],
           ),
           _buildTags(context),

@@ -222,10 +222,13 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
                                     ),
                                   ),
                                 );
-                              } else if (choice == LocaleKeys.duplicateBook.tr()) {
+                              } else if (choice ==
+                                  LocaleKeys.duplicateBook.tr()) {
                                 final cover = state.getCoverBytes();
 
-                                context.read<EditBookCoverCubit>().setCover(cover);
+                                context
+                                    .read<EditBookCoverCubit>()
+                                    .setCover(cover);
 
                                 final newBook = state.copyWith(
                                   title:
@@ -245,12 +248,18 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
                                     ),
                                   ),
                                 );
-                              } else if (choice == LocaleKeys.delete_book.tr()) {
-                                _showDeleteRestoreDialog(context, true, null, state);
-                              } else if (choice == LocaleKeys.restore_book.tr()) {
-                                _showDeleteRestoreDialog(context, false, null, state);
-                              } else if (choice == LocaleKeys.delete_permanently.tr()) {
-                                _showDeleteRestoreDialog(context, true, true, state);
+                              } else if (choice ==
+                                  LocaleKeys.delete_book.tr()) {
+                                _showDeleteRestoreDialog(
+                                    context, true, null, state);
+                              } else if (choice ==
+                                  LocaleKeys.restore_book.tr()) {
+                                _showDeleteRestoreDialog(
+                                    context, false, null, state);
+                              } else if (choice ==
+                                  LocaleKeys.delete_permanently.tr()) {
+                                _showDeleteRestoreDialog(
+                                    context, true, true, state);
                               }
                             },
                           );

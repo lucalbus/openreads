@@ -109,26 +109,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _invokeMenuOption(String choice) async {
-    await Future.delayed(const Duration(milliseconds: 0));
-
-    if (!mounted) return;
-
-    if (currentPageIndex == 0) {
-      if (choice == menuOptions[0]) {
-        openSortFilterSheet();
-      } else if (choice == menuOptions[1]) {
-        goToDisplayScreen();
-      } else if (choice == menuOptions[2]) {
-        goToSettingsScreen();
-      }
-    } else if (currentPageIndex == 1) {
-      if (choice == menuOptions[0]) {
-        goToSettingsScreen();
-      }
-    }
-  }
-
   void _onFabPressed() {
     if (Platform.isIOS) {
       showCupertinoModalBottomSheet(
@@ -334,25 +314,37 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       actions: [
         currentPageIndex == 0
-            ? IconButton(
-                onPressed: _goToSearchInUserBooksPage,
-                icon: const Icon(Icons.search),
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: _goToSearchInUserBooksPage,
+                    icon: const Icon(Icons.search),
+                  ),
+                  IconButton(
+                    tooltip: LocaleKeys.sort_filter.tr(),
+                    icon: const Icon(Icons.sort),
+                    onPressed: openSortFilterSheet,
+                  ),
+                  IconButton(
+                    tooltip: LocaleKeys.display.tr(),
+                    icon: const Icon(Icons.view_list),
+                    onPressed: goToDisplayScreen,
+                  ),
+                  IconButton(
+                    tooltip: LocaleKeys.settings.tr(),
+                    icon: const Icon(Icons.settings),
+                    onPressed: goToSettingsScreen,
+                  ),
+                ],
               )
-            : const SizedBox(),
-        PopupMenuButton<String>(
-          onSelected: (_) {},
-          itemBuilder: (_) {
-            return menuOptions.map((String choice) {
-              return PopupMenuItem<String>(
-                value: choice,
-                child: Text(
-                  choice,
-                ),
-                onTap: () => _invokeMenuOption(choice),
-              );
-            }).toList();
-          },
-        ),
+            : currentPageIndex == 1
+                ? IconButton(
+                    tooltip: LocaleKeys.settings.tr(),
+                    icon: const Icon(Icons.settings),
+                    onPressed: goToSettingsScreen,
+                  )
+                : const SizedBox(),
       ],
     );
 

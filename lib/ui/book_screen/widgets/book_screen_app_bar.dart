@@ -139,10 +139,8 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final moreButtonOptions = [
-      LocaleKeys.edit_book.tr(),
-      LocaleKeys.duplicateBook.tr(),
-    ];
+    // base options are built per-state inside the builder to avoid
+    // mutating a shared list across rebuilds
 
     // Needed to add BlocBuilder because the status bar was changing
     // to different color then in BooksScreen
@@ -166,83 +164,109 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
           actions: [
             BlocBuilder<CurrentBookCubit, Book>(
               builder: (context, state) {
-                if (moreButtonOptions.length == 2) {
-                  if (state.deleted == true) {
-                    moreButtonOptions.add(LocaleKeys.restore_book.tr());
-                    moreButtonOptions.add(
-                      LocaleKeys.delete_permanently.tr(),
-                    );
-                  } else {
-                    moreButtonOptions.add(LocaleKeys.delete_book.tr());
-                  }
+                // Build options fresh per-state to avoid list mutation bugs
+                final moreButtonOptions = <String>[];
+                moreButtonOptions.add(LocaleKeys.duplicateBook.tr());
+
+                if (state.deleted == true) {
+                  moreButtonOptions.add(LocaleKeys.restore_book.tr());
+                  moreButtonOptions.add(LocaleKeys.delete_permanently.tr());
+                } else {
+                  moreButtonOptions.add(LocaleKeys.delete_book.tr());
                 }
 
-                return PopupMenuButton<String>(
-                  onSelected: (_) {},
-                  itemBuilder: (_) {
-                    return moreButtonOptions.map((String choice) {
-                      return PopupMenuItem<String>(
-                        value: choice,
-                        child: Text(choice),
-                        onTap: () async {
-                          context.read<EditBookCubit>().setBook(state);
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      tooltip: LocaleKeys.edit_book.tr(),
+                      icon: const Icon(Icons.edit),
+                      onPressed: () async {
+                        // Préparer l'EditBookCubit puis ouvrir l'écran d'édition
+                        context.read<EditBookCubit>().setBook(state);
 
-                          await Future.delayed(const Duration(
-                            milliseconds: 0,
-                          ));
-                          if (!context.mounted) return;
+                        await Future.delayed(const Duration(milliseconds: 0));
+                        if (!context.mounted) return;
 
-                          if (choice == moreButtonOptions[0]) {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const AddBookScreen(
-                                  editingExistingBook: true,
-                                ),
-                              ),
-                            );
-                          } else if (choice == moreButtonOptions[1]) {
-                            final cover = state.getCoverBytes();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AddBookScreen(
+                              editingExistingBook: true,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    PopupMenuButton<String>(
+                      onSelected: (_) {},
+                      itemBuilder: (_) {
+                        return moreButtonOptions.map((String choice) {
+                          return PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(choice),
+                            onTap: () async {
+                              context.read<EditBookCubit>().setBook(state);
 
-                            context.read<EditBookCoverCubit>().setCover(cover);
+                              await Future.delayed(const Duration(
+                                milliseconds: 0,
+                              ));
+                              if (!context.mounted) return;
 
-                            final newBook = state.copyWith(
-                              title:
-                                  '${state.title} ${LocaleKeys.copyBook.tr()}',
-                              readings: [],
-                              rating: 0,
-                            );
-                            newBook.id = null;
+                              if (choice == LocaleKeys.edit_book.tr()) {
+                                // Should not normally appear (we have a pencil),
+                                // but keep behavior if present.
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const AddBookScreen(
+                                      editingExistingBook: true,
+                                    ),
+                                  ),
+                                );
+                              } else if (choice ==
+                                  LocaleKeys.duplicateBook.tr()) {
+                                final cover = state.getCoverBytes();
 
-                            context.read<EditBookCubit>().setBook(newBook);
-                            context.read<EditBookCubit>().setHasCover(true);
+                                context
+                                    .read<EditBookCoverCubit>()
+                                    .setCover(cover);
 
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const AddBookScreen(
-                                  duplicatingBook: true,
-                                ),
-                              ),
-                            );
-                          } else if (choice == moreButtonOptions[2]) {
-                            if (state.deleted == false) {
-                              _showDeleteRestoreDialog(
-                                  context, true, null, state);
-                            } else {
-                              _showDeleteRestoreDialog(
-                                  context, false, null, state);
-                            }
-                          } else if (choice == moreButtonOptions[3]) {
-                            _showDeleteRestoreDialog(
-                              context,
-                              true,
-                              true,
-                              state,
-                            );
-                          }
-                        },
-                      );
-                    }).toList();
-                  },
+                                final newBook = state.copyWith(
+                                  title:
+                                      '${state.title} ${LocaleKeys.copyBook.tr()}',
+                                  readings: [],
+                                  rating: 0,
+                                );
+                                newBook.id = null;
+
+                                context.read<EditBookCubit>().setBook(newBook);
+                                context.read<EditBookCubit>().setHasCover(true);
+
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const AddBookScreen(
+                                      duplicatingBook: true,
+                                    ),
+                                  ),
+                                );
+                              } else if (choice ==
+                                  LocaleKeys.delete_book.tr()) {
+                                _showDeleteRestoreDialog(
+                                    context, true, null, state);
+                              } else if (choice ==
+                                  LocaleKeys.restore_book.tr()) {
+                                _showDeleteRestoreDialog(
+                                    context, false, null, state);
+                              } else if (choice ==
+                                  LocaleKeys.delete_permanently.tr()) {
+                                _showDeleteRestoreDialog(
+                                    context, true, true, state);
+                              }
+                            },
+                          );
+                        }).toList();
+                      },
+                    ),
+                  ],
                 );
               },
             ),

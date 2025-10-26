@@ -42,7 +42,7 @@ class _CoverViewState extends State<CoverView> {
       children: [
         SizedBox(
           width: mediaQuery.size.width,
-          height: (mediaQuery.size.height / 2.5) + mediaQuery.padding.top + 20,
+          height: (mediaQuery.size.height / 2.5) + mediaQuery.padding.top + 40,
           child: const Stack(
             children: [
               CoverBackground(),
@@ -51,7 +51,8 @@ class _CoverViewState extends State<CoverView> {
         ),
         Column(
           children: [
-            SizedBox(height: mediaQuery.padding.top - 20),
+            // Add space for status bar + app bar so cover doesn't overlap buttons
+            SizedBox(height: mediaQuery.padding.top),
             Center(
               child: SizedBox(
                 height: mediaQuery.size.height / 2.5,

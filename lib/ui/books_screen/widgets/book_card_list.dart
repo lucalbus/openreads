@@ -44,19 +44,23 @@ class BookCardList extends StatelessWidget {
         switch (book.status) {
           case BookStatus.read:
             return BlocBuilder<SortFinishedBooksBloc, SortState>(
-              builder: (_, state) => _buildSortAttributeContent(state.sortType, state.isAsc),
+              builder: (_, state) =>
+                  _buildSortAttributeContent(state.sortType, state.isAsc),
             );
           case BookStatus.inProgress:
             return BlocBuilder<SortInProgressBooksBloc, SortState>(
-              builder: (_, state) => _buildSortAttributeContent(state.sortType, state.isAsc),
+              builder: (_, state) =>
+                  _buildSortAttributeContent(state.sortType, state.isAsc),
             );
           case BookStatus.forLater:
             return BlocBuilder<SortForLaterBooksBloc, SortState>(
-              builder: (_, state) => _buildSortAttributeContent(state.sortType, state.isAsc),
+              builder: (_, state) =>
+                  _buildSortAttributeContent(state.sortType, state.isAsc),
             );
           case BookStatus.unfinished:
             return BlocBuilder<SortUnfinishedBooksBloc, SortState>(
-              builder: (_, state) => _buildSortAttributeContent(state.sortType, state.isAsc),
+              builder: (_, state) =>
+                  _buildSortAttributeContent(state.sortType, state.isAsc),
             );
         }
       },
@@ -66,7 +70,8 @@ class BookCardList extends StatelessWidget {
   Widget _buildSortAttributeContent(SortType sortType, bool isAsc) {
     if (sortType == SortType.byPages) {
       return (book.pages != null) ? _buildPagesAttribute() : const SizedBox();
-    } else if (sortType == SortType.byStartDate || sortType == SortType.byFinishDate) {
+    } else if (sortType == SortType.byStartDate ||
+        sortType == SortType.byFinishDate) {
       // For start/finish sorts: display both when available.
       // Order depends on sort order: if ascending -> start then finish; if descending -> finish then start.
       final latestFinishDate = getLatestFinishDate(book);

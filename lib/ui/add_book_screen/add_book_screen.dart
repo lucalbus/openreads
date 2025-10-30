@@ -607,6 +607,79 @@ class _AddBookScreenState extends State<AddBookScreen> {
                           setState(() {
                             _isbnCtrl.text = result.rawContent;
                           });
+
+                          // show loading dialog while fetching edition
+                          if (!mounted) return;
+                          showDialog<void>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) => Center(
+                              child: CircularProgressIndicator(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          );
+
+                          try {
+                            final edition =
+                                await OpenLibraryService().getEditionByISBN(isbn: result.rawContent);
+
+                            if (!mounted) return;
+
+                            if (edition != null) {
+                              // gather authors
+                              final authors = <String>[];
+                              for (final author in edition.authors ?? []) {
+                                final authorResult =
+                                    await OpenLibraryService().getAuthor(key: author.key);
+                                if (authorResult?.name != null) {
+                                  authors.add(authorResult!.name!);
+                                }
+                              }
+
+                              // apply fields to controllers (listeners update EditBookCubit)
+                              setState(() {
+                                _titleCtrl.text = edition.title ?? _titleCtrl.text;
+                                _subtitleCtrl.text = edition.subtitle ?? _subtitleCtrl.text;
+                                _authorCtrl.text = authors.isNotEmpty ? authors.join(', ') : _authorCtrl.text;
+                                _pagesCtrl.text = edition.numberOfPages != null ? edition.numberOfPages.toString() : _pagesCtrl.text;
+                                _isbnCtrl.text = (edition.isbn13 != null && edition.isbn13!.isNotEmpty)
+                                    ? edition.isbn13![0]
+                                    : (edition.isbn10 != null && edition.isbn10!.isNotEmpty)
+                                        ? edition.isbn10![0]
+                                        : _isbnCtrl.text;
+                                _olidCtrl.text = (edition.key != null) ? edition.key!.replaceAll('/books/', '') : _olidCtrl.text;
+                                _pubYearCtrl.text = int.tryParse(edition.publishDate ?? '')?.toString() ?? _pubYearCtrl.text;
+                                _descriptionCtrl.text = edition.description ?? _descriptionCtrl.text;
+                              });
+
+                              // If OpenLibrary gives a physical format, update the cubit so the UI reflects it
+                              if (edition.physicalFormat != null) {
+                                context.read<EditBookCubit>().setBookFormat(edition.physicalFormat!);
+                              }
+
+                              // download cover if present
+                              if (edition.covers != null && edition.covers!.isNotEmpty) {
+                                final coverId = edition.covers![0];
+                                final coverUrl = 'https://covers.openlibrary.org/b/id/$coverId-L.jpg';
+                                try {
+                                  final resp = await http.get(Uri.parse(coverUrl));
+                                  if (resp.statusCode == 200) {
+                                    await generateBlurHash(resp.bodyBytes, context);
+                                    context.read<EditBookCoverCubit>().setCover(resp.bodyBytes);
+                                    context.read<EditBookCubit>().setHasCover(true);
+                                  }
+                                } catch (_) {
+                                  // ignore cover download errors
+                                }
+                              }
+                            } else {
+                              // no edition found — keep isbn only
+                              _showSnackbar(LocaleKeys.no_search_results.tr());
+                            }
+                          } finally {
+                            if (mounted) Navigator.of(context, rootNavigator: true).pop();
+                          }
                         }
                       },
                       child: Container(

@@ -120,6 +120,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
     final book = Book(
       title: result.title!,
       subtitle: result.subtitle,
+      description: result.description,
       author: authors ?? '',
       pages: result.numberOfPages,
       status: widget.status,

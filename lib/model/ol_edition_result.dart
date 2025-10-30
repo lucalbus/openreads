@@ -18,6 +18,7 @@ class OLEditionResult {
     this.classifications,
     this.sourceRecords,
     this.title,
+    this.description,
     this.subtitle,
     this.identifiers,
     this.isbn13,
@@ -44,6 +45,7 @@ class OLEditionResult {
   final Classifications? classifications;
   final List<String>? sourceRecords;
   final String? title;
+  final String? description;
   final String? subtitle;
   final Identifiers? identifiers;
   final List<String>? isbn13;
@@ -98,6 +100,11 @@ class OLEditionResult {
           ? null
           : List<String>.from(json["local_id"].map((x) => x)),
       publishDate: json["publish_date"],
+      description: json["description"] is String
+        ? json["description"] as String
+        : json["description"] is Map
+          ? (json["description"]["value"] as String?)
+          : null,
       works: json["works"] == null
           ? null
           : List<Type>.from(json["works"].map((x) => Type.fromJson(x))),
@@ -110,13 +117,63 @@ class OLEditionResult {
           ? null
           : Created.fromJson(json["last_modified"]),
       physicalFormat: json['physical_format'] != null
-          ? json['physical_format'] == 'Hardcover'
-              ? BookFormat.hardcover
-              : json['physical_format'] == 'Mass Market Paperback'
-                  ? BookFormat.paperback
-                  : null
+          ? _parsePhysicalFormat(json['physical_format'] as String)
           : null,
     );
+  }
+
+  // Map OpenLibrary `physical_format` strings to our BookFormat enum.
+  // This switch respects case (exact match) as requested.
+  static BookFormat? _parsePhysicalFormat(String value) {
+    final v = value.trim().toLowerCase();
+    switch (v) {
+      // Hardcovers
+      case 'hardcover':
+        return BookFormat.hardcover;
+
+      // Paperbacks and print formats (singular forms, case-insensitive)
+      case 'paperback':
+      case 'mass market paperback':
+      case 'trade paperback':
+      case 'spiral-bound':
+      case 'spiral bound':
+      case 'board book':
+      case 'pamphlet':
+      case 'coloring book':
+      case 'workbook':
+      case 'bound sheet music':
+      case 'catalog':
+      case 'textbook':
+      case 'reference book':
+      case 'pictorial':
+      case 'bound government report':
+      case 'comic book':
+      case 'periodical with isbn':
+        return BookFormat.paperback;
+
+      // Ebooks / electronic formats
+      case 'ebook':
+      case 'electronic book':
+      case 'digital':
+      case 'digital edition':
+      case 'kindle':
+      case 'kindle edition':
+        return BookFormat.ebook;
+
+      // Audiobooks and audio formats
+      case 'cassette':
+      case 'cd':
+      case 'audio cd':
+      case 'digital audio':
+      case 'memory card':
+      case 'card':
+      case 'audiobook':
+        return BookFormat.audiobook;
+
+      // Unknown / not mapped
+      default:
+        return null;
+    }
   }
 }
 

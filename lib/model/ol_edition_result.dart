@@ -101,10 +101,10 @@ class OLEditionResult {
           : List<String>.from(json["local_id"].map((x) => x)),
       publishDate: json["publish_date"],
       description: json["description"] is String
-        ? json["description"] as String
-        : json["description"] is Map
-          ? (json["description"]["value"] as String?)
-          : null,
+          ? json["description"] as String
+          : json["description"] is Map
+              ? (json["description"]["value"] as String?)
+              : null,
       works: json["works"] == null
           ? null
           : List<Type>.from(json["works"].map((x) => Type.fromJson(x))),

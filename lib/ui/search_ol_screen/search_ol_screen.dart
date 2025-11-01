@@ -125,7 +125,6 @@ class _SearchOLScreenState extends State<SearchOLScreen>
       publisher: (result.publishers != null && result.publishers!.isNotEmpty)
           ? result.publishers![0]
           : null,
-      description: result.description,
       author: authors ?? '',
       pages: result.numberOfPages,
       status: widget.status,

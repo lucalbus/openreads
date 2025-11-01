@@ -53,6 +53,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
   final _titleCtrl = TextEditingController();
   final _subtitleCtrl = TextEditingController();
   final _authorCtrl = TextEditingController();
+  final _publisherCtrl = TextEditingController();
   final _pagesCtrl = TextEditingController();
   final _pubYearCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
@@ -81,6 +82,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
     _titleCtrl.text = book.title;
     _subtitleCtrl.text = book.subtitle ?? '';
     _authorCtrl.text = book.author;
+    _publisherCtrl.text = book.publisher ?? '';
     _pubYearCtrl.text = (book.publicationYear ?? '').toString();
     _pagesCtrl.text = (book.pages ?? '').toString();
     _descriptionCtrl.text = book.description ?? '';
@@ -341,6 +343,10 @@ class _AddBookScreenState extends State<AddBookScreen> {
       context.read<EditBookCubit>().setAuthor(_authorCtrl.text);
     });
 
+    _publisherCtrl.addListener(() {
+      context.read<EditBookCubit>().setPublisher(_publisherCtrl.text);
+    });
+
     _pagesCtrl.addListener(() {
       context.read<EditBookCubit>().setPages(_pagesCtrl.text);
     });
@@ -529,6 +535,17 @@ class _AddBookScreenState extends State<AddBookScreen> {
                   padding: EdgeInsets.all(10),
                   child: Divider(),
                 ),
+                // TODO: i18n this label (add LocaleKeys.publisher)
+                BookTextField(
+                  controller: _publisherCtrl,
+                  hint: 'Publisher',
+                  icon: FontAwesomeIcons.building,
+                  keyboardType: TextInputType.text,
+                  maxLines: 5,
+                  maxLength: 255,
+                  textCapitalization: TextCapitalization.words,
+                ),
+                const SizedBox(height: 10),
                 BookTypeDropdown(
                   bookTypes: bookTypes,
                   changeBookType: _changeBookType,

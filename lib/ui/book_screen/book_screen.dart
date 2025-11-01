@@ -135,6 +135,7 @@ class BookScreen extends StatelessWidget {
                     children: [
                       _buildTitleDetail(state),
                       _buildStatusDetail(state, context),
+                      _buildPublisherDetail(state),
                       _buildBookFormatDetail(state),
                       _buildPublicationYearDetail(state),
                       _buildPagesDetail(state),
@@ -214,6 +215,16 @@ class BookScreen extends StatelessWidget {
         ? BookDetail(
             title: LocaleKeys.pages_uppercase.tr(),
             text: (state.pages ?? "").toString(),
+          )
+        : const SizedBox();
+  }
+
+  Widget _buildPublisherDetail(Book state) {
+    return (state.publisher != null && state.publisher!.isNotEmpty)
+        ? BookDetail(
+            //TODO: i18n this label (add LocaleKeys.publisher)
+            title: 'Publisher',
+            text: state.publisher!,
           )
         : const SizedBox();
   }

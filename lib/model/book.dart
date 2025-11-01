@@ -14,6 +14,7 @@ class Book {
   String title;
   String? subtitle;
   String author;
+  String? publisher;
   String? description;
   BookStatus status;
   bool favourite;
@@ -40,6 +41,7 @@ class Book {
     required this.author,
     required this.status,
     this.subtitle,
+    this.publisher,
     this.description,
     this.favourite = false,
     this.deleted = false,
@@ -70,6 +72,7 @@ class Book {
       id: null,
       title: '',
       author: '',
+      publisher: null,
       status: status,
       favourite: false,
       deleted: false,
@@ -88,6 +91,7 @@ class Book {
       title: json['title'],
       subtitle: json['subtitle'],
       author: json['author'],
+      publisher: json['publisher'],
       description: json['description'],
       status: parseBookStatus(json['status']),
       rating: json['rating'],
@@ -128,6 +132,7 @@ class Book {
     int? id,
     String? title,
     String? author,
+    String? publisher,
     BookStatus? status,
     String? subtitle,
     String? description,
@@ -153,6 +158,7 @@ class Book {
       id: this.id ?? id,
       title: title ?? this.title,
       subtitle: subtitle ?? this.subtitle,
+      publisher: publisher ?? this.publisher,
       author: author ?? this.author,
       status: status ?? this.status,
       description: description ?? this.description,
@@ -181,6 +187,7 @@ class Book {
       id: id,
       title: title,
       subtitle: subtitle,
+      publisher: publisher,
       author: author,
       status: status,
       description: description,
@@ -266,6 +273,7 @@ class Book {
       'title': title,
       'subtitle': subtitle,
       'author': author,
+      'publisher': publisher,
       'description': description,
       'status': status.value,
       'rating': rating,

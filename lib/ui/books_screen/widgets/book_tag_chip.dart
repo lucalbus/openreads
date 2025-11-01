@@ -19,23 +19,34 @@ class BooksTabChip extends StatefulWidget {
 }
 
 class _BookTabChipState extends State<BooksTabChip> {
-  _scrollToChip(int index, BuildContext context) {
-    Scrollable.ensureVisible(
-      context,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+  VoidCallback? _tabListener;
+
+  void _scrollToChip(int index, BuildContext context) {
+    try {
+      if (!mounted) return;
+      final renderObject = context.findRenderObject();
+      if (renderObject == null) return;
+      Scrollable.ensureVisible(
+        context,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } catch (_) {
+      // ignore any exceptions during scrolling to avoid crashing the app
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    widget.tabController.addListener(() {
+    _tabListener = () {
       // Scrolls the chip into view when the tab changes
+      if (!mounted) return;
       if (widget.index == widget.tabController.index) {
         _scrollToChip(widget.index, context);
       }
-    });
+    };
+    widget.tabController.addListener(_tabListener!);
   }
 
   @override
@@ -62,11 +73,20 @@ class _BookTabChipState extends State<BooksTabChip> {
               _scrollToChip(widget.index, context);
               BlocProvider.of<BooksTabIndexCubit>(context)
                   .setTabIndex(widget.index);
-              widget.tabController.index = widget.index;
             },
           );
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    try {
+      if (_tabListener != null) {
+        widget.tabController.removeListener(_tabListener!);
+      }
+    } catch (_) {}
+    super.dispose();
   }
 }

@@ -674,8 +674,22 @@ class _BooksScreenState extends State<BooksScreen>
   void initState() {
     super.initState();
 
-    _tabController = TabController(length: 4, vsync: this);
+    // Initialize TabController with the current BooksTabIndexCubit's state to avoid
+    // jumping animation when returning to this screen.
+    int initialIndex = 0;
+    try {
+      initialIndex = context.read<BooksTabIndexCubit>().state;
+    } catch (_) {}
+
+    _tabController = TabController(length: 4, vsync: this, initialIndex: initialIndex);
     _chipScrollController = ScrollController();
+  }
+  
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _chipScrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -698,10 +712,31 @@ class _BooksScreenState extends State<BooksScreen>
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: _buildTabs(context, bookListsOrder),
+              child: BlocListener<BooksTabIndexCubit, int>(
+                listener: (context, tabIndex) {
+                  if (!mounted) return;
+                  // Defer the index change to the next frame to avoid modifying
+                  // the TabController during widget build/rebuild which can
+                  // cause exceptions in some widget trees.
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    try {
+                      if (!mounted) return;
+                      if (tabIndex < 0 || tabIndex >= _tabController.length) {
+                        return; // ignore out-of-range indices
+                      }
+                      if (_tabController.index != tabIndex) {
+                        _tabController.index = tabIndex;
+                      }
+                    } catch (_) {
+                      // ignore errors when updating the controller (e.g., disposed)
+                    }
+                  });
+                },
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: _buildTabs(context, bookListsOrder),
+                ),
               ),
             ),
           ],

@@ -70,6 +70,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
     int? cover,
     List<String>? isbn,
     String? olid,
+    String? publisher,
   }) {
     final defaultBookFormat = context.read<DefaultBooksFormatCubit>().state;
     final defaultTags = context.read<DefaultBookTagsCubit>().state;
@@ -77,6 +78,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
     final book = Book(
       title: title,
       subtitle: subtitle,
+      publisher: publisher,
       author: author,
       status: widget.status,
       favourite: false,
@@ -121,6 +123,9 @@ class _SearchOLScreenState extends State<SearchOLScreen>
       title: result.title!,
       subtitle: result.subtitle,
       description: result.description,
+      publisher: (result.publishers != null && result.publishers!.isNotEmpty)
+          ? result.publishers![0]
+          : null,
       author: authors ?? '',
       pages: result.numberOfPages,
       status: widget.status,

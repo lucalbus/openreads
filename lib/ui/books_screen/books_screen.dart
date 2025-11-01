@@ -15,6 +15,7 @@ import 'package:openreads/logic/bloc/sort_bloc/sort_state.dart';
 import 'package:openreads/logic/bloc/sort_bloc/sort_unfinished_books_bloc.dart';
 import 'package:openreads/logic/cubit/book_lists_order_cubit.dart';
 import 'package:openreads/logic/cubit/display_cubit.dart';
+import 'package:openreads/logic/cubit/books_tab_index_cubit.dart';
 import 'package:openreads/main.dart';
 import 'package:openreads/model/book.dart';
 import 'package:openreads/ui/books_screen/widgets/widgets.dart';
@@ -546,24 +547,39 @@ class _BooksScreenState extends State<BooksScreen>
         startDateSorting *= -1;
       } // descending
       if (startDateSorting == 0) {
-        // secondary sorting, by release date
-        int releaseSorting = 0;
-        if ((a.publicationYear != null) && (b.publicationYear != null)) {
-          releaseSorting = a.publicationYear!.compareTo(b.publicationYear!);
+        // secondary sorting, by finish date
+        int finishDateSorting = 0;
+        if ((getLatestFinishDate(a) != null) &&
+            (getLatestFinishDate(b) != null)) {
+          finishDateSorting = getLatestFinishDate(a)!
+              .millisecondsSinceEpoch
+              .compareTo(getLatestFinishDate(b)!.millisecondsSinceEpoch);
           if (!isAsc) {
-            releaseSorting *= -1;
+            finishDateSorting *= -1;
           }
         }
-        if (releaseSorting == 0) {
-          // tertiary sorting, by title
-          int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-              .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
-          if (!isAsc) {
-            titleSorting *= -1;
+        if (finishDateSorting == 0) {
+          // tertiary sorting, by release date
+          int releaseSorting = 0;
+          if ((a.publicationYear != null) && (b.publicationYear != null)) {
+            releaseSorting = a.publicationYear!.compareTo(b.publicationYear!);
+            if (!isAsc) {
+              releaseSorting *= -1;
+            }
           }
-          return titleSorting;
+          if (releaseSorting == 0) {
+            // fourth sorting, by title
+            int titleSorting =
+                removeDiacritics(a.title.toString().toLowerCase()).compareTo(
+                    removeDiacritics(b.title.toString().toLowerCase()));
+            if (!isAsc) {
+              titleSorting *= -1;
+            }
+            return titleSorting;
+          }
+          return releaseSorting;
         }
-        return releaseSorting;
+        return finishDateSorting;
       }
       return startDateSorting;
     });
@@ -603,24 +619,39 @@ class _BooksScreenState extends State<BooksScreen>
         finishDateSorting *= -1;
       } // descending
       if (finishDateSorting == 0) {
-        // secondary sorting, by release date
-        int releaseSorting = 0;
-        if ((a.publicationYear != null) && (b.publicationYear != null)) {
-          releaseSorting = a.publicationYear!.compareTo(b.publicationYear!);
+        // secondary sorting, by start date
+        int startDateSorting = 0;
+        if ((getLatestStartDate(a) != null) &&
+            (getLatestStartDate(b) != null)) {
+          startDateSorting = getLatestStartDate(a)!
+              .millisecondsSinceEpoch
+              .compareTo(getLatestStartDate(b)!.millisecondsSinceEpoch);
           if (!isAsc) {
-            releaseSorting *= -1;
+            startDateSorting *= -1;
           }
         }
-        if (releaseSorting == 0) {
-          // tertiary sorting, by title
-          int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-              .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
-          if (!isAsc) {
-            titleSorting *= -1;
+        if (startDateSorting == 0) {
+          // tertiary sorting, by release date
+          int releaseSorting = 0;
+          if ((a.publicationYear != null) && (b.publicationYear != null)) {
+            releaseSorting = a.publicationYear!.compareTo(b.publicationYear!);
+            if (!isAsc) {
+              releaseSorting *= -1;
+            }
           }
-          return titleSorting;
+          if (releaseSorting == 0) {
+            // fourth sorting, by title
+            int titleSorting =
+                removeDiacritics(a.title.toString().toLowerCase()).compareTo(
+                    removeDiacritics(b.title.toString().toLowerCase()));
+            if (!isAsc) {
+              titleSorting *= -1;
+            }
+            return titleSorting;
+          }
+          return releaseSorting;
         }
-        return releaseSorting;
+        return startDateSorting;
       }
       return finishDateSorting;
     });
@@ -674,8 +705,23 @@ class _BooksScreenState extends State<BooksScreen>
   void initState() {
     super.initState();
 
-    _tabController = TabController(length: 4, vsync: this);
+    // Initialize TabController with the current BooksTabIndexCubit's state to avoid
+    // jumping animation when returning to this screen.
+    int initialIndex = 0;
+    try {
+      initialIndex = context.read<BooksTabIndexCubit>().state;
+    } catch (_) {}
+
+    _tabController =
+        TabController(length: 4, vsync: this, initialIndex: initialIndex);
     _chipScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _chipScrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -698,10 +744,31 @@ class _BooksScreenState extends State<BooksScreen>
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: _buildTabs(context, bookListsOrder),
+              child: BlocListener<BooksTabIndexCubit, int>(
+                listener: (context, tabIndex) {
+                  if (!mounted) return;
+                  // Defer the index change to the next frame to avoid modifying
+                  // the TabController during widget build/rebuild which can
+                  // cause exceptions in some widget trees.
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    try {
+                      if (!mounted) return;
+                      if (tabIndex < 0 || tabIndex >= _tabController.length) {
+                        return; // ignore out-of-range indices
+                      }
+                      if (_tabController.index != tabIndex) {
+                        _tabController.index = tabIndex;
+                      }
+                    } catch (_) {
+                      // ignore errors when updating the controller (e.g., disposed)
+                    }
+                  });
+                },
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: _buildTabs(context, bookListsOrder),
+                ),
               ),
             ),
           ],

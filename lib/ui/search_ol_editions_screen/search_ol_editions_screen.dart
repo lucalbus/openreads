@@ -59,6 +59,9 @@ class _SearchOLEditionsScreenState extends State<SearchOLEditionsScreen> {
       title: result.title!,
       subtitle: result.subtitle,
       author: widget.author,
+      publisher: (result.publishers != null && result.publishers!.isNotEmpty)
+          ? result.publishers![0]
+          : null,
       pages: result.numberOfPages,
       status: widget.status,
       favourite: false,

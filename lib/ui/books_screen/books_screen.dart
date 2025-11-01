@@ -15,6 +15,7 @@ import 'package:openreads/logic/bloc/sort_bloc/sort_state.dart';
 import 'package:openreads/logic/bloc/sort_bloc/sort_unfinished_books_bloc.dart';
 import 'package:openreads/logic/cubit/book_lists_order_cubit.dart';
 import 'package:openreads/logic/cubit/display_cubit.dart';
+import 'package:openreads/logic/cubit/books_tab_index_cubit.dart';
 import 'package:openreads/main.dart';
 import 'package:openreads/model/book.dart';
 import 'package:openreads/ui/books_screen/widgets/widgets.dart';
@@ -711,10 +712,11 @@ class _BooksScreenState extends State<BooksScreen>
       initialIndex = context.read<BooksTabIndexCubit>().state;
     } catch (_) {}
 
-    _tabController = TabController(length: 4, vsync: this, initialIndex: initialIndex);
+    _tabController =
+        TabController(length: 4, vsync: this, initialIndex: initialIndex);
     _chipScrollController = ScrollController();
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();

@@ -546,24 +546,39 @@ class _BooksScreenState extends State<BooksScreen>
         startDateSorting *= -1;
       } // descending
       if (startDateSorting == 0) {
-        // secondary sorting, by release date
-        int releaseSorting = 0;
-        if ((a.publicationYear != null) && (b.publicationYear != null)) {
-          releaseSorting = a.publicationYear!.compareTo(b.publicationYear!);
+        // secondary sorting, by finish date
+        int finishDateSorting = 0;
+        if ((getLatestFinishDate(a) != null) &&
+            (getLatestFinishDate(b) != null)) {
+          finishDateSorting = getLatestFinishDate(a)!
+              .millisecondsSinceEpoch
+              .compareTo(getLatestFinishDate(b)!.millisecondsSinceEpoch);
           if (!isAsc) {
-            releaseSorting *= -1;
+            finishDateSorting *= -1;
           }
         }
-        if (releaseSorting == 0) {
-          // tertiary sorting, by title
-          int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-              .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
-          if (!isAsc) {
-            titleSorting *= -1;
+        if (finishDateSorting == 0) {
+          // tertiary sorting, by release date
+          int releaseSorting = 0;
+          if ((a.publicationYear != null) && (b.publicationYear != null)) {
+            releaseSorting = a.publicationYear!.compareTo(b.publicationYear!);
+            if (!isAsc) {
+              releaseSorting *= -1;
+            }
           }
-          return titleSorting;
+          if (releaseSorting == 0) {
+            // fourth sorting, by title
+            int titleSorting =
+                removeDiacritics(a.title.toString().toLowerCase()).compareTo(
+                    removeDiacritics(b.title.toString().toLowerCase()));
+            if (!isAsc) {
+              titleSorting *= -1;
+            }
+            return titleSorting;
+          }
+          return releaseSorting;
         }
-        return releaseSorting;
+        return finishDateSorting;
       }
       return startDateSorting;
     });
@@ -603,24 +618,39 @@ class _BooksScreenState extends State<BooksScreen>
         finishDateSorting *= -1;
       } // descending
       if (finishDateSorting == 0) {
-        // secondary sorting, by release date
-        int releaseSorting = 0;
-        if ((a.publicationYear != null) && (b.publicationYear != null)) {
-          releaseSorting = a.publicationYear!.compareTo(b.publicationYear!);
+        // secondary sorting, by start date
+        int startDateSorting = 0;
+        if ((getLatestStartDate(a) != null) &&
+            (getLatestStartDate(b) != null)) {
+          startDateSorting = getLatestStartDate(a)!
+              .millisecondsSinceEpoch
+              .compareTo(getLatestStartDate(b)!.millisecondsSinceEpoch);
           if (!isAsc) {
-            releaseSorting *= -1;
+            startDateSorting *= -1;
           }
         }
-        if (releaseSorting == 0) {
-          // tertiary sorting, by title
-          int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-              .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
-          if (!isAsc) {
-            titleSorting *= -1;
+        if (startDateSorting == 0) {
+          // tertiary sorting, by release date
+          int releaseSorting = 0;
+          if ((a.publicationYear != null) && (b.publicationYear != null)) {
+            releaseSorting = a.publicationYear!.compareTo(b.publicationYear!);
+            if (!isAsc) {
+              releaseSorting *= -1;
+            }
           }
-          return titleSorting;
+          if (releaseSorting == 0) {
+            // fourth sorting, by title
+            int titleSorting =
+                removeDiacritics(a.title.toString().toLowerCase()).compareTo(
+                    removeDiacritics(b.title.toString().toLowerCase()));
+            if (!isAsc) {
+              titleSorting *= -1;
+            }
+            return titleSorting;
+          }
+          return releaseSorting;
         }
-        return releaseSorting;
+        return startDateSorting;
       }
       return finishDateSorting;
     });

@@ -697,6 +697,16 @@ class _AddBookScreenState extends State<AddBookScreen> {
                                   // ignore cover download errors
                                 }
                               }
+
+                                // mark as modified now since we populated fields via scan
+                                try {
+                                  final current = context.read<EditBookCubit>().state;
+                                  context
+                                      .read<EditBookCubit>()
+                                      .setBook(current.copyWith(dateModified: DateTime.now()));
+                                } catch (_) {
+                                  // ignore if cubit not available
+                                }
                             } else {
                               // no edition found — keep isbn only
                               _showSnackbar(LocaleKeys.no_search_results.tr());

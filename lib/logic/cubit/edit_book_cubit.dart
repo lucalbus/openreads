@@ -54,6 +54,12 @@ class EditBookCubit extends Cubit<Book> {
     emit(state.copyWith(author: author));
   }
 
+  void setPublisher(String publisher) {
+    final book = state.copyWith();
+    book.publisher = publisher.isNotEmpty ? publisher : null;
+    emit(book);
+  }
+
   void setPages(String pages) {
     final book = state.copyWith();
     book.pages = pages.isEmpty ? null : int.parse(pages);

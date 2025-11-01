@@ -122,6 +122,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
     final book = Book(
       title: result.title!,
       subtitle: result.subtitle,
+      description: result.description,
       publisher: (result.publishers != null && result.publishers!.isNotEmpty)
           ? result.publishers![0]
           : null,

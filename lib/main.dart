@@ -287,6 +287,7 @@ class _OpenreadsAppState extends State<OpenreadsApp>
                   : Brightness.dark,
         ),
         child: MaterialApp(
+          debugShowCheckedModeBanner: false,
           title: Constants.appName,
           scaffoldMessengerKey: snackbarKey,
           theme: lightTheme,

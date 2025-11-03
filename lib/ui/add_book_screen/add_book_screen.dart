@@ -418,6 +418,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
     _titleCtrl.dispose();
     _subtitleCtrl.dispose();
     _authorCtrl.dispose();
+    _publisherCtrl.dispose();
     _pagesCtrl.dispose();
     _pubYearCtrl.dispose();
     _descriptionCtrl.dispose();
@@ -535,10 +536,9 @@ class _AddBookScreenState extends State<AddBookScreen> {
                   padding: EdgeInsets.all(10),
                   child: Divider(),
                 ),
-                // TODO: i18n this label (add LocaleKeys.publisher)
                 BookTextField(
                   controller: _publisherCtrl,
-                  hint: 'Publisher',
+                  hint: LocaleKeys.publisher.tr(),
                   icon: FontAwesomeIcons.building,
                   keyboardType: TextInputType.text,
                   maxLines: 5,

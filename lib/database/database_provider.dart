@@ -145,7 +145,8 @@ class DatabaseProvider {
           migrationScriptsV5 +
           migrationScriptsV6 +
           migrationScriptsV7 +
-          migrationScriptsV8,
+          migrationScriptsV8 +
+          migrationScriptsV9,
     );
   }
 
@@ -157,7 +158,8 @@ class DatabaseProvider {
           migrationScriptsV5 +
           migrationScriptsV6 +
           migrationScriptsV7 +
-          migrationScriptsV8,
+          migrationScriptsV8 +
+          migrationScriptsV9,
     );
   }
 
@@ -168,7 +170,8 @@ class DatabaseProvider {
           migrationScriptsV5 +
           migrationScriptsV6 +
           migrationScriptsV7 +
-          migrationScriptsV8,
+          migrationScriptsV8 +
+          migrationScriptsV9,
     );
   }
 
@@ -178,28 +181,32 @@ class DatabaseProvider {
       migrationScriptsV5 +
           migrationScriptsV6 +
           migrationScriptsV7 +
-          migrationScriptsV8,
+          migrationScriptsV8 +
+          migrationScriptsV9,
     );
   }
 
   void _updateBookDatabaseV5toLatest(Batch batch) {
     _executeBatch(
       batch,
-      migrationScriptsV6 + migrationScriptsV7 + migrationScriptsV8,
+      migrationScriptsV6 +
+          migrationScriptsV7 +
+          migrationScriptsV8 +
+          migrationScriptsV9,
     );
   }
 
   void _updateBookDatabaseV6toLatest(Batch batch) {
     _executeBatch(
       batch,
-      migrationScriptsV7 + migrationScriptsV8,
+      migrationScriptsV7 + migrationScriptsV8 + migrationScriptsV9,
     );
   }
 
   void _updateBookDatabaseV7toLatest(Batch batch) {
     _executeBatch(
       batch,
-      migrationScriptsV8,
+      migrationScriptsV8 + migrationScriptsV9,
     );
   }
 

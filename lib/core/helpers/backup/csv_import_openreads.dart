@@ -86,6 +86,7 @@ class CSVImportOpenreads {
         title: _getField(i, csv, 'title'),
         subtitle: _getField(i, csv, 'subtitle'),
         author: _getField(i, csv, 'author'),
+        publisher: _getField(i, csv, 'publisher'),
         description: _getField(i, csv, 'description'),
         status: _getStatus(i, csv),
         favourite: _getBoolField(i, csv, 'favourite'),

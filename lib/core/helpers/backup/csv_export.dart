@@ -85,6 +85,7 @@ class CSVExport {
         ('title'),
         ('subtitle'),
         ('author'),
+        ('publisher'),
         ('description'),
         ('status'),
         ('favourite'),
@@ -111,6 +112,7 @@ class CSVExport {
         newRow.add(book.title);
         newRow.add(book.subtitle ?? '');
         newRow.add(book.author);
+        newRow.add(book.publisher ?? '');
         newRow.add(book.description ?? '');
         newRow.add(
           book.status == BookStatus.read

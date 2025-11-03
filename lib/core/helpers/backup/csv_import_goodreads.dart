@@ -197,6 +197,7 @@ class CSVImportGoodreads {
       return Book(
         title: _getTitle(i, csv, headers),
         author: _getAuthor(i, csv, headers),
+        publisher: _getPublisher(i, csv, headers),
         isbn: _getISBN(i, csv, headers),
         rating: _getRating(i, csv, headers),
         pages: _getPages(i, csv, headers),
@@ -214,6 +215,14 @@ class CSVImportGoodreads {
 
       return null;
     }
+  }
+
+  static String? _getPublisher(int i, List<List<dynamic>> csv, List headers) {
+    final index = headers.indexOf('Publisher');
+    if (index == -1) return null;
+
+    final publisher = csv[i][index].toString();
+    return publisher.isNotEmpty ? publisher : null;
   }
 
   static String? _getISBN(int i, List<List<dynamic>> csv, List headers) {

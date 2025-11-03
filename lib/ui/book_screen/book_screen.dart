@@ -222,8 +222,7 @@ class BookScreen extends StatelessWidget {
   Widget _buildPublisherDetail(Book state) {
     return (state.publisher != null && state.publisher!.isNotEmpty)
         ? BookDetail(
-            //TODO: i18n this label (add LocaleKeys.publisher)
-            title: 'Publisher',
+            title: LocaleKeys.publisher.tr(),
             text: state.publisher!,
           )
         : const SizedBox();

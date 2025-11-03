@@ -189,7 +189,10 @@ class DatabaseProvider {
   void _updateBookDatabaseV5toLatest(Batch batch) {
     _executeBatch(
       batch,
-      migrationScriptsV6 + migrationScriptsV7 + migrationScriptsV8 + migrationScriptsV9,
+      migrationScriptsV6 +
+          migrationScriptsV7 +
+          migrationScriptsV8 +
+          migrationScriptsV9,
     );
   }
 
